@@ -31,12 +31,12 @@ function Campo({
 }) {
   return (
     <View className="mb-3 flex-1">
-      <Text className="mb-1 text-[11px] font-semibold text-[#203752]">
+      <Text className="mb-1 text-xs font-semibold text-[#203752]">
         {titulo}
       </Text>
 
       <TextInput
-        className="h-10 rounded-md border border-[#E1E7F0] bg-[#F9FAFC] px-3 text-xs text-[#273A52]"
+        className="h-11 rounded-md border border-[#E1E7F0] bg-[#F9FAFC] px-3 text-sm text-[#273A52]"
         value={valor}
         onChangeText={alterar}
         placeholder={titulo}
@@ -74,9 +74,11 @@ function Botao({
   return (
     <Pressable
       onPress={acao}
-      className={`min-h-9 flex-1 items-center justify-center rounded-md px-2 py-2 ${fundo}`}
+      className={`min-h-10 flex-1 items-center justify-center rounded-md px-2 py-2 ${fundo}`}
     >
-      <Text className={`text-center text-[10px] font-semibold ${corTexto}`}>
+      <Text
+        className={`text-center text-xs font-semibold ${corTexto}`}
+      >
         {titulo}
       </Text>
     </Pressable>
@@ -107,7 +109,9 @@ export default function Clientes() {
       setClientes(dados);
       setErro('');
     } catch {
-      setErro('Não foi possível conectar à API. Verifique se o backend está ativo.');
+      setErro(
+        'Não foi possível conectar à API. Verifique se o backend está ativo.',
+      );
     }
   }
 
@@ -136,11 +140,18 @@ export default function Clientes() {
 
     try {
       const resposta = await fetch(
-        editando ? `${API}/clientes/${editando}` : `${API}/clientes`,
+        editando
+          ? `${API}/clientes/${editando}`
+          : `${API}/clientes`,
         {
           method: editando ? 'PUT' : 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nome, cpf, telefone, email }),
+          body: JSON.stringify({
+            nome,
+            cpf,
+            telefone,
+            email,
+          }),
         },
       );
 
@@ -168,37 +179,52 @@ export default function Clientes() {
     setEmail(cliente.email);
   }
 
-  function excluirCliente(id: string) {
-    Alert.alert('Excluir cliente', 'Deseja realmente excluir este cliente?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Excluir',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            const resposta = await fetch(`${API}/clientes/${id}`, {
-              method: 'DELETE',
-            });
-
-            if (!resposta.ok) {
-              throw new Error('Não foi possível excluir o cliente.');
-            }
-
-            if (editando === id) limparFormulario();
-
-            await carregarClientes();
-          } catch (e) {
-            Alert.alert(
-              'Erro',
-              e instanceof Error ? e.message : 'Erro ao excluir cliente.',
-            );
-          }
-        },
-      },
-    ]);
+  function consultarCliente(cliente: Cliente) {
+    Alert.alert(
+      cliente.nome,
+      `CPF: ${cliente.cpf}\nTelefone: ${cliente.telefone}\nE-mail: ${cliente.email}`,
+    );
   }
 
-  const filtrados = clientes.filter((cliente) =>
+  function excluirCliente(id: string) {
+    Alert.alert(
+      'Excluir cliente',
+      'Deseja realmente excluir este cliente?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const resposta = await fetch(`${API}/clientes/${id}`, {
+                method: 'DELETE',
+              });
+
+              if (!resposta.ok) {
+                throw new Error('Não foi possível excluir o cliente.');
+              }
+
+              if (editando === id) {
+                limparFormulario();
+              }
+
+              await carregarClientes();
+            } catch (e) {
+              Alert.alert(
+                'Erro',
+                e instanceof Error
+                  ? e.message
+                  : 'Erro ao excluir cliente.',
+              );
+            }
+          },
+        },
+      ],
+    );
+  }
+
+  const filtrados = clientes.filter(cliente =>
     `${cliente.nome} ${cliente.cpf} ${cliente.telefone}`
       .toLowerCase()
       .includes(busca.toLowerCase()),
@@ -208,7 +234,7 @@ export default function Clientes() {
     <View className="flex-1 bg-[#F3F6FA]">
       {/* Cabeçalho */}
       <View className="bg-[#173253] px-5 pb-5 pt-3">
-        <Text className="mb-3 text-[10px] tracking-widest text-[#DCE8F7]">
+        <Text className="mb-3 text-[11px] tracking-widest text-[#DCE8F7]">
           ⚒  OFICINA CENTRAL
         </Text>
 
@@ -216,29 +242,40 @@ export default function Clientes() {
           Clientes
         </Text>
 
-        <Text className="mt-1 text-xs text-[#D0DDED]">
+        <Text className="mt-1 text-sm text-[#D0DDED]">
           Cadastros e contatos sempre à mão.
         </Text>
       </View>
 
-      <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        className="flex-1"
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="px-3 pb-5 pt-3">
           {erro !== '' && (
             <View className="mb-3 rounded-lg bg-red-100 p-3">
-              <Text className="text-xs text-red-800">{erro}</Text>
-              <Pressable onPress={carregarClientes} className="mt-2">
-                <Text className="font-bold text-red-800">Tentar novamente</Text>
+              <Text className="text-sm text-red-800">
+                {erro}
+              </Text>
+
+              <Pressable
+                onPress={carregarClientes}
+                className="mt-2"
+              >
+                <Text className="text-sm font-bold text-red-800">
+                  Tentar novamente
+                </Text>
               </Pressable>
             </View>
           )}
 
           {/* Formulário */}
           <View className="mb-4 rounded-xl border border-[#DDE5EF] bg-white p-3">
-            <Text className="text-base font-bold text-[#203752]">
+            <Text className="text-lg font-bold text-[#203752]">
               Dados do cliente
             </Text>
 
-            <Text className="mb-3 mt-1 text-[11px] text-[#718096]">
+            <Text className="mb-4 mt-1 text-xs text-[#718096]">
               {editando
                 ? 'Edite os dados do cliente.'
                 : 'Cadastre um novo cliente.'}
@@ -251,7 +288,12 @@ export default function Clientes() {
             />
 
             <View className="flex-row gap-2">
-              <Campo titulo="CPF" valor={cpf} alterar={setCpf} />
+              <Campo
+                titulo="CPF"
+                valor={cpf}
+                alterar={setCpf}
+              />
+
               <Campo
                 titulo="Telefone"
                 valor={telefone}
@@ -283,19 +325,23 @@ export default function Clientes() {
 
           {/* Lista de clientes */}
           <View className="mb-2 flex-row items-center justify-between">
-            <Text className="text-sm font-bold text-[#203752]">
+            <Text className="text-base font-bold text-[#203752]">
               Clientes cadastrados
             </Text>
 
-            <Text className="text-[10px] text-[#718096]">
+            <Text className="text-xs text-[#718096]">
               {clientes.length} clientes
             </Text>
           </View>
 
+          {/* Busca */}
           <View className="mb-2 flex-row items-center rounded-lg border border-[#E0E7F0] bg-white px-3">
-            <Text className="mr-2 text-lg text-[#718096]">⌕</Text>
+            <Text className="mr-2 text-xl text-[#718096]">
+              ⌕
+            </Text>
+
             <TextInput
-              className="h-10 flex-1 text-xs text-[#243750]"
+              className="h-11 flex-1 text-sm text-[#243750]"
               value={busca}
               onChangeText={setBusca}
               placeholder="Buscar por nome, CPF ou telefone"
@@ -303,17 +349,18 @@ export default function Clientes() {
             />
           </View>
 
-          {filtrados.map((cliente) => (
+          {/* Cartões */}
+          {filtrados.map(cliente => (
             <View
               key={cliente.id}
-              className="mb-2 rounded-xl border border-[#DFE6EF] bg-white p-3"
+              className="mb-3 rounded-xl border border-[#DFE6EF] bg-white p-3"
             >
               <View className="mb-3 flex-row items-center gap-3">
-                <View className="h-10 w-10 items-center justify-center rounded-full bg-[#E8EFF7]">
-                  <Text className="font-bold text-[#244D7D]">
+                <View className="h-11 w-11 items-center justify-center rounded-full bg-[#E8EFF7]">
+                  <Text className="text-sm font-bold text-[#244D7D]">
                     {(cliente.nome || '?')
                       .split(' ')
-                      .map((parte) => parte[0])
+                      .map(parte => parte[0])
                       .slice(0, 2)
                       .join('')
                       .toUpperCase()}
@@ -321,32 +368,28 @@ export default function Clientes() {
                 </View>
 
                 <View className="flex-1">
-                  <Text className="text-xs font-bold text-[#203752]">
+                  <Text className="text-sm font-bold text-[#203752]">
                     {cliente.nome}
                   </Text>
-                  <Text className="mt-1 text-[10px] text-[#718096]">
+
+                  <Text className="mt-1 text-xs text-[#718096]">
                     {cliente.telefone}
                   </Text>
                 </View>
               </View>
 
-              <Text className="mb-1 text-[10px] text-[#718096]">
+              <Text className="mb-1 text-xs text-[#718096]">
                 {cliente.email}
               </Text>
 
-              <Text className="mb-3 text-[10px] text-[#718096]">
+              <Text className="mb-3 text-xs text-[#718096]">
                 CPF: {cliente.cpf}
               </Text>
 
               <View className="flex-row gap-2">
                 <Botao
                   titulo="Consultar"
-                  acao={() =>
-                    Alert.alert(
-                      cliente.nome,
-                      `CPF: ${cliente.cpf}\nTelefone: ${cliente.telefone}\nE-mail: ${cliente.email}`,
-                    )
-                  }
+                  acao={() => consultarCliente(cliente)}
                 />
 
                 <Botao
@@ -364,7 +407,7 @@ export default function Clientes() {
           ))}
 
           {filtrados.length === 0 && (
-            <Text className="py-6 text-center text-xs text-[#718096]">
+            <Text className="py-6 text-center text-sm text-[#718096]">
               {busca
                 ? 'Nenhum cliente encontrado.'
                 : 'Nenhum cliente cadastrado.'}

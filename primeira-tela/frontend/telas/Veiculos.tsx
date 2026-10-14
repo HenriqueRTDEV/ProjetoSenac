@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -134,36 +135,44 @@ export default function Veiculos() {
   }
 
   function excluirVeiculo(id: string) {
-    Alert.alert('Excluir veículo', 'Deseja realmente excluir este veículo?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Excluir',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            const resposta = await fetch(`${API}/veiculos/${id}`, {
-              method: 'DELETE',
-            });
+    Alert.alert(
+      'Excluir veículo',
+      'Deseja realmente excluir este veículo?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const resposta = await fetch(`${API}/veiculos/${id}`, {
+                method: 'DELETE',
+              });
 
-            if (!resposta.ok) {
-              throw new Error('Não foi possível excluir o veículo.');
+              if (!resposta.ok) {
+                throw new Error('Não foi possível excluir o veículo.');
+              }
+
+              if (editando === id) limparFormulario();
+
+              await carregarDados();
+            } catch (e) {
+              Alert.alert(
+                'Erro',
+                e instanceof Error ? e.message : 'Erro ao excluir veículo.',
+              );
             }
-
-            if (editando === id) limparFormulario();
-            await carregarDados();
-          } catch (e) {
-            Alert.alert(
-              'Erro',
-              e instanceof Error ? e.message : 'Erro ao excluir veículo.',
-            );
-          }
+          },
         },
-      },
-    ]);
+      ],
+    );
   }
 
   function nomeCliente(id: string) {
-    return clientes.find(cliente => cliente.id === id)?.nome || 'Cliente não encontrado';
+    return (
+      clientes.find(cliente => cliente.id === id)?.nome ||
+      'Cliente não encontrado'
+    );
   }
 
   const filtrados = veiculos.filter(veiculo =>
@@ -180,12 +189,12 @@ export default function Veiculos() {
   ) {
     return (
       <View className="mb-3 flex-1">
-        <Text className="mb-1 text-[11px] font-semibold text-[#203752]">
+        <Text className="mb-1 text-xs font-semibold text-[#203752]">
           {titulo}
         </Text>
 
         <TextInput
-          className="h-10 rounded-md border border-[#E1E7F0] bg-[#F9FAFC] px-3 text-xs text-[#273A52]"
+          className="h-11 rounded-md border border-[#E1E7F0] bg-[#F9FAFC] px-3 text-sm text-[#273A52]"
           value={valor}
           onChangeText={alterar}
           placeholder={titulo}
@@ -219,9 +228,11 @@ export default function Veiculos() {
     return (
       <Pressable
         onPress={acao}
-        className={`min-h-9 flex-1 items-center justify-center rounded-md px-2 py-2 ${fundo}`}
+        className={`min-h-10 flex-1 items-center justify-center rounded-md px-2 py-2 ${fundo}`}
       >
-        <Text className={`text-center text-[10px] font-semibold ${texto}`}>
+        <Text
+          className={`text-center text-xs font-semibold ${texto}`}
+        >
           {titulo}
         </Text>
       </Pressable>
@@ -231,13 +242,15 @@ export default function Veiculos() {
   return (
     <View className="flex-1 bg-[#F3F6FA]">
       <View className="bg-[#173253] px-5 pb-5 pt-3">
-        <Text className="mb-3 text-[10px] tracking-widest text-[#DCE8F7]">
+        <Text className="mb-3 text-[11px] tracking-widest text-[#DCE8F7]">
           ⚒  OFICINA CENTRAL
         </Text>
 
-        <Text className="text-2xl font-bold text-white">Veículos</Text>
+        <Text className="text-2xl font-bold text-white">
+          Veículos
+        </Text>
 
-        <Text className="mt-1 text-xs text-[#D0DDED]">
+        <Text className="mt-1 text-sm text-[#D0DDED]">
           Cada veículo vinculado ao seu proprietário.
         </Text>
       </View>
@@ -248,32 +261,40 @@ export default function Veiculos() {
       >
         <View className="px-3 pb-5 pt-3">
           {erro !== '' && (
-            <Text className="mb-3 rounded-lg bg-red-100 p-3 text-xs text-red-800">
-              {erro}
-            </Text>
+            <View className="mb-3 rounded-lg bg-red-100 p-3">
+              <Text className="text-sm text-red-800">
+                {erro}
+              </Text>
+
+              <Pressable onPress={carregarDados} className="mt-2">
+                <Text className="text-sm font-bold text-red-800">
+                  Tentar novamente
+                </Text>
+              </Pressable>
+            </View>
           )}
 
           <View className="mb-4 rounded-xl border border-[#DDE5EF] bg-white p-3">
-            <Text className="text-base font-bold text-[#203752]">
+            <Text className="text-lg font-bold text-[#203752]">
               Dados do veículo
             </Text>
 
-            <Text className="mb-3 mt-1 text-[11px] text-[#718096]">
+            <Text className="mb-4 mt-1 text-xs text-[#718096]">
               {editando
                 ? 'Editando os dados do veículo.'
                 : 'Cadastre o veículo e vincule um proprietário.'}
             </Text>
 
-            <Text className="mb-1 text-[11px] font-semibold text-[#203752]">
+            <Text className="mb-1 text-xs font-semibold text-[#203752]">
               Cliente proprietário
             </Text>
 
             <Pressable
               onPress={() => setAbrirClientes(!abrirClientes)}
-              className="mb-3 min-h-10 flex-row items-center justify-between rounded-md border border-[#E1E7F0] bg-[#F9FAFC] px-3 py-2"
+              className="mb-3 min-h-11 flex-row items-center justify-between rounded-md border border-[#E1E7F0] bg-[#F9FAFC] px-3 py-2"
             >
               <Text
-                className={`flex-1 text-xs ${
+                className={`flex-1 text-sm ${
                   clienteId ? 'text-[#273A52]' : 'text-[#8998AA]'
                 }`}
               >
@@ -281,7 +302,7 @@ export default function Veiculos() {
                   'Selecione um cliente'}
               </Text>
 
-              <Text className="ml-2 text-sm text-[#718096]">
+              <Text className="ml-2 text-base text-[#718096]">
                 {abrirClientes ? '⌃' : '⌄'}
               </Text>
             </Pressable>
@@ -289,7 +310,7 @@ export default function Veiculos() {
             {abrirClientes && (
               <View className="mb-3 rounded-md border border-[#E1E7F0] bg-white">
                 {clientes.length === 0 ? (
-                  <Text className="p-3 text-xs text-[#718096]">
+                  <Text className="p-3 text-sm text-[#718096]">
                     Cadastre um cliente primeiro.
                   </Text>
                 ) : (
@@ -302,7 +323,7 @@ export default function Veiculos() {
                       }}
                       className="border-b border-[#EDF1F6] px-3 py-3"
                     >
-                      <Text className="text-xs text-[#273A52]">
+                      <Text className="text-sm text-[#273A52]">
                         {cliente.nome}
                       </Text>
                     </Pressable>
@@ -328,8 +349,9 @@ export default function Veiculos() {
 
             <View className="flex-row gap-2">
               {botao('Cancelar', limparFormulario)}
+
               {botao(
-                editando ? '✓ Salvar alterações' : '+ Cadastrar',
+                editando ? 'Salvar alterações' : '+ Cadastrar',
                 salvarVeiculo,
                 'principal',
               )}
@@ -337,20 +359,22 @@ export default function Veiculos() {
           </View>
 
           <View className="mb-2 flex-row items-center justify-between">
-            <Text className="text-sm font-bold text-[#203752]">
+            <Text className="text-base font-bold text-[#203752]">
               Veículos cadastrados
             </Text>
 
-            <Text className="text-[10px] text-[#718096]">
+            <Text className="text-xs text-[#718096]">
               {veiculos.length} veículos
             </Text>
           </View>
 
           <View className="mb-2 flex-row items-center rounded-lg border border-[#E0E7F0] bg-white px-3">
-            <Text className="mr-2 text-lg text-[#718096]">⌕</Text>
+            <Text className="mr-2 text-xl text-[#718096]">
+              ⌕
+            </Text>
 
             <TextInput
-              className="h-10 flex-1 text-xs text-[#243750]"
+              className="h-11 flex-1 text-sm text-[#243750]"
               value={busca}
               onChangeText={setBusca}
               placeholder="Buscar por placa, modelo ou cliente"
@@ -361,36 +385,42 @@ export default function Veiculos() {
           {filtrados.map(veiculo => (
             <View
               key={veiculo.id}
-              className="mb-2 rounded-xl border border-[#DFE6EF] bg-white p-3"
+              className="mb-3 rounded-xl border border-[#DFE6EF] bg-white p-3"
             >
-              <View className="mb-2 flex-row items-center gap-3">
-                <View className="h-10 w-10 items-center justify-center rounded-lg bg-[#EAF0F7]">
-                  <Text className="text-lg text-[#365A83]">▱</Text>
+              <View className="mb-3 flex-row items-center gap-3">
+                <View className="h-11 w-11 items-center justify-center rounded-lg bg-[#EAF0F7]">
+                  <Text className="text-xl text-[#365A83]">
+                    ▱
+                  </Text>
                 </View>
 
                 <View className="flex-1">
-                  <Text className="text-xs font-bold text-[#203752]">
+                  <Text className="text-sm font-bold text-[#203752]">
                     {veiculo.marca} {veiculo.modelo}
                   </Text>
 
-                  <Text className="mt-1 text-[10px] text-[#718096]">
+                  <Text className="mt-1 text-xs text-[#718096]">
                     {veiculo.ano} · {veiculo.cor}
                   </Text>
                 </View>
 
                 <View className="rounded border border-[#E0E7F0] px-2 py-1">
-                  <Text className="text-[10px] font-bold text-[#203752]">
+                  <Text className="text-xs font-bold text-[#203752]">
                     {veiculo.placa}
                   </Text>
                 </View>
               </View>
 
-              <Text className="mb-3 text-[10px] text-[#718096]">
+              <Text className="mb-3 text-xs text-[#718096]">
                 ♙  {nomeCliente(veiculo.clienteId)} · Proprietário
               </Text>
 
               <View className="flex-row gap-2">
-                {botao('✎ Editar veículo', () => editarVeiculo(veiculo))}
+                {botao(
+                  'Editar veículo',
+                  () => editarVeiculo(veiculo),
+                )}
+
                 {botao(
                   'Excluir',
                   () => excluirVeiculo(veiculo.id),
@@ -401,7 +431,7 @@ export default function Veiculos() {
           ))}
 
           {filtrados.length === 0 && (
-            <Text className="py-6 text-center text-xs text-[#718096]">
+            <Text className="py-6 text-center text-sm text-[#718096]">
               {busca
                 ? 'Nenhum veículo encontrado.'
                 : 'Nenhum veículo cadastrado.'}
